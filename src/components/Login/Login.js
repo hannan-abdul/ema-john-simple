@@ -27,7 +27,7 @@ function Login() {
 
   const googleProvider = new firebase.auth.GoogleAuthProvider();
   const fbProvider = new firebase.auth.FacebookAuthProvider();
-  const handleSignIn = () => {
+  const handleGoogleSignIn = () => {
     firebase.auth().signInWithPopup(googleProvider)
       .then(res => {
         const { displayName, photoURL, email } = res.user;
@@ -35,7 +35,7 @@ function Login() {
           isSignedIn: true,
           name: displayName,
           email: email,
-          photo: photoURL
+          photo: photoURL,
         }
         setUser(signedInUser);
         console.log(displayName, email, photoURL);
@@ -153,7 +153,7 @@ function Login() {
     <div style={{textAlign: 'center'}}>
       {
         user.isSignedIn ? <button onClick={handleSignOut}>Sign Out</button> :
-          <button onClick={handleSignIn}>Sign In</button>
+          <button onClick={handleGoogleSignIn}>Sign In using Google</button>
       }
       <br/>
       {
