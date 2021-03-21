@@ -7,6 +7,7 @@ import happyImage from '../../images/giphy.gif';
 import { useHistory } from 'react-router';
 
 const Review = () => {
+    document.title = 'Review';
     const [cart, setCart] = useState([]);
     const [orderPlaced, setOrderPlaced] = useState(false);
 
