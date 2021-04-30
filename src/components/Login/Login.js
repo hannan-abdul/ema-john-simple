@@ -37,8 +37,11 @@ function Login() {
           email: email,
           photo: photoURL,
         }
-        setUser(signedInUser);
-        console.log(displayName, email, photoURL);
+        setUserToken();
+        return signedInUser;
+        // setLoggedInUser(signedInUser);
+        // history.replace(from);
+        // console.log(displayName, email, photoURL);
       })
       .catch(error => {
         console.log(error);
@@ -46,20 +49,28 @@ function Login() {
       })
   }
 
-  const handleFbSignIn = () =>{
+  const setUserToken = () => {
+    firebase.auth().currentUser.getIdToken(/* forceRefresh */ true).then(function (idToken) {
+      sessionStorage.setItem('token', idToken)
+    }).catch(function (error) {
+      // Handle error
+    });
+  }
+
+  const handleFbSignIn = () => {
     firebase.auth().signInWithPopup(fbProvider)
-  .then((result) => {
-    var credential = result.credential;
-    var user = result.user;
-    var accessToken = credential.accessToken;
-    console.log('fb user',user)
-  })
-  .catch((error) => {
-    var errorCode = error.code;
-    var errorMessage = error.message;
-    var email = error.email;
-    var credential = error.credential;
-  });
+      .then((result) => {
+        var credential = result.credential;
+        var user = result.user;
+        var accessToken = credential.accessToken;
+        console.log('fb user', user)
+      })
+      .catch((error) => {
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        var email = error.email;
+        var credential = error.credential;
+      });
   }
 
   const handleSignOut = () => {
@@ -150,12 +161,12 @@ function Login() {
   }
 
   return (
-    <div style={{textAlign: 'center'}}>
+    <div style={{ textAlign: 'center' }}>
       {
         user.isSignedIn ? <button onClick={handleSignOut}>Sign Out</button> :
           <button onClick={handleGoogleSignIn}>Sign In using Google</button>
       }
-      <br/>
+      <br />
       {
         <button onClick={handleFbSignIn}>Sign in using Facebook</button>
       }

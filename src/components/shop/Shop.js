@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import fakeData from '../../fakeData';
 import { addToDatabaseCart, getDatabaseCart } from '../../utilities/databaseManager';
 import Cart from '../cart/Cart';
 import Product from '../product/Product';
@@ -7,34 +6,48 @@ import './Shop.css';
 import { Link } from 'react-router-dom';
 
 const Shop = () => {
-    const first10 = fakeData.slice(0,10);
-    const [products, setProducts]=useState(first10);
-    const [cart, setCart]= useState([]);
+    // const first10 = fakeData.slice(0,10);
+    const [products, setProducts] = useState([]);
+    const [cart, setCart] = useState([]);
+    const [search, setSearch] = useState('');
     document.title = "Shop";
 
-    useEffect(()=>{
+    useEffect(() => {
+        fetch('http://localhost:5050/products?search='+search)
+            .then(res => res.json())
+            .then(data => setProducts(data))
+    }, [search])
+
+    useEffect(() => {
         const savedCart = getDatabaseCart();
         const productKeys = Object.keys(savedCart);
-        const previousCart = productKeys.map (existingKey =>{
-            const product = fakeData.find(pd => pd.key === existingKey);
-            product.quantity = savedCart[existingKey];
-            return product;
+        fetch('https://blooming-beach-96972.herokuapp.com/productsByKeys', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(productKeys)
         })
-        setCart(previousCart);
-    },[])
+            .then(res => res.json())
+            .then(data => setCart(data))
+    }, [])
 
-    const handleAddProduct = (product) =>{
+    const handleSearch = event => {
+        setSearch(event.target.value);
+    }
+
+    const handleAddProduct = (product) => {
         const toBeAddedKey = product.key;
         const sameProduct = cart.find(pd => pd.key === toBeAddedKey);
         let count = 1;
         let newCart;
-        if (sameProduct){
+        if (sameProduct) {
             count = sameProduct.quantity + 1;
             sameProduct.quantity = count;
             const others = cart.filter(pd => pd.key !== toBeAddedKey);
             newCart = [...others, sameProduct]
         }
-        else{
+        else {
             product.quantity = 1;
             newCart = [...cart, product];
         }
@@ -45,17 +58,21 @@ const Shop = () => {
     return (
         <div className="twin-container">
             <div className="product-container">
-                {/* spinner...... */}
-            {
-                products.length === 0 && <p>loading....</p>
-            }
-            {
-                products.map(pd => <Product 
-                    showAddToCart = {true}
-                handleAddProduct ={handleAddProduct}
-                product={pd}>
-                </Product>)
-            }
+                <input type="text" onBlur={handleSearch} className="product-search"/>
+                {/* spinner  */}
+                {
+                    products.length === 0 && <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                }
+                {/* spinner  */}
+                {
+                    products.map(pd => <Product
+                        showAddToCart={true}
+                        handleAddProduct={handleAddProduct}
+                        product={pd}>
+                    </Product>)
+                }
             </div>
             <div className="cart-container">
                 <Cart cart={cart}>
@@ -64,7 +81,7 @@ const Shop = () => {
                     </Link>
                 </Cart>
             </div>
-            
+
         </div>
     );
 };
